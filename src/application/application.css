@@ -1,0 +1,17 @@
+/* JavaFX CSS - Leave this comment until you have at least create one rule which uses -fx-Property */
+
+.login {
+	-fx-background-color: #2F334A;
+	-fx-min-width: 900px;
+	-fx-min-height: 500px;
+}
+
+.input {
+	-fx-background-color: transparent;
+	-fx-border-color: #F3B469;
+	-fx-text-fill: white;
+}
+
+.button {
+	-fx-background-color: #D8727F;
+}

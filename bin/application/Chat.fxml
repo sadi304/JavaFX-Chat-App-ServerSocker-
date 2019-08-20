@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane styleClass="login" stylesheets="@application.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Pane layoutX="229.0" layoutY="435.0" prefHeight="65.0" prefWidth="677.0" style="-fx-background-color: #ccc;">
+         <children>
+            <TextField fx:id="message" onAction="#onMessageEnter" prefHeight="75.0" prefWidth="677.0" promptText="Write a message.." style="-fx-background-color: #fff; -fx-border-radius: 0;">
+               <font>
+                  <Font size="16.0" />
+               </font>
+            </TextField>
+         </children>
+      </Pane>
+      <TextArea fx:id="messages" editable="false" layoutX="229.0" prefHeight="435.0" prefWidth="677.0" style="-fx-text-fill: #111;" />
+      <Pane prefHeight="508.0" prefWidth="230.0" style="-fx-background-color: #343B80#343B80;" />
+   </children>
+</AnchorPane>
