@@ -6,8 +6,19 @@ import java.util.ResourceBundle;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextBoundsType;
 
 import java.io.*;
 
@@ -25,6 +36,9 @@ public class ChatController {
 	
 	@FXML
 	private TextArea messages;
+	
+	@FXML
+	private VBox messageArea;
 	
     public void initialize() {
     	connectToSocket();
@@ -44,7 +58,7 @@ public class ChatController {
             // send user name
             dos.writeUTF(userName);
             
-            Thread t = new ServerHandler(socket, dis, dos, messages);
+            Thread t = new ServerHandler(socket, dis, dos, messages, messageArea);
             t.start();
     	} catch(UnknownHostException u) { 
             System.out.println(u); 
@@ -66,11 +80,13 @@ class ServerHandler extends Thread {
     final DataOutputStream dos; 
     final Socket s; 
     private TextArea messages;
-	public ServerHandler(Socket s, DataInputStream dis, DataOutputStream dos, TextArea messages) { 
+    private VBox messageArea;
+	public ServerHandler(Socket s, DataInputStream dis, DataOutputStream dos, TextArea messages, VBox messageArea) { 
         this.s = s; 
         this.dis = dis; 
         this.dos = dos; 
         this.messages = messages;
+        this.messageArea = messageArea;
     }
 	
 	@Override
@@ -79,7 +95,23 @@ class ServerHandler extends Thread {
 		while (true)  { 
             try { 
             	received = dis.readUTF();
+            	final String lambdaReceived = received;
             	messages.appendText(received + "\n");
+            	Platform.runLater(() -> {
+                	Label label = new Label(lambdaReceived);
+                	HBox messageHolder = new HBox(5);
+                	
+                	Circle avatar = new Circle(20);
+                	Text text = new Text("S");
+                	text.setBoundsType(TextBoundsType.VISUAL); 
+                	StackPane avatarWithLetter = new StackPane();
+                	avatarWithLetter.getChildren().addAll(avatar, text);
+                	
+                	avatar.setFill(Color.CADETBLUE);    
+                	HBox.setMargin(label, new Insets(10, 0, 10, 0));
+                	messageHolder.getChildren().addAll(avatarWithLetter, label);
+                	messageArea.getChildren().add(messageHolder);
+            	});
             } catch (IOException e) { 
                 e.printStackTrace(); 
             }
