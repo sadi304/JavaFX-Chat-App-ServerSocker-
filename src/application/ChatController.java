@@ -8,6 +8,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.FlowPane;
@@ -40,12 +41,18 @@ public class ChatController {
 	@FXML
 	private VBox messageArea;
 	
+	@FXML
+	private ScrollPane scrollPane;
+	
     public void initialize() {
     	connectToSocket();
+
+    	scrollPane.setFitToWidth(true);
     }
     
     public void setUserName(String userName) {
     	this.userName = userName;
+    	
     }
     
     public void connectToSocket() {
@@ -58,7 +65,7 @@ public class ChatController {
             // send user name
             dos.writeUTF(userName);
             
-            Thread t = new ServerHandler(socket, dis, dos, messages, messageArea);
+            Thread t = new ServerHandler(socket, dis, dos, messages, messageArea, scrollPane);
             t.start();
     	} catch(UnknownHostException u) { 
             System.out.println(u); 
@@ -81,12 +88,14 @@ class ServerHandler extends Thread {
     final Socket s; 
     private TextArea messages;
     private VBox messageArea;
-	public ServerHandler(Socket s, DataInputStream dis, DataOutputStream dos, TextArea messages, VBox messageArea) { 
+    private ScrollPane scrollPane;
+	public ServerHandler(Socket s, DataInputStream dis, DataOutputStream dos, TextArea messages, VBox messageArea, ScrollPane scrollPane) { 
         this.s = s; 
         this.dis = dis; 
         this.dos = dos; 
         this.messages = messages;
         this.messageArea = messageArea;
+        this.scrollPane = scrollPane;
     }
 	
 	@Override
@@ -102,8 +111,11 @@ class ServerHandler extends Thread {
                 	HBox messageHolder = new HBox(5);
                 	
                 	Circle avatar = new Circle(20);
-                	Text text = new Text("S");
+                	
+                	String firstLetter = lambdaReceived.substring(0, 1);
+                	Text text = new Text(firstLetter);
                 	text.setBoundsType(TextBoundsType.VISUAL); 
+                	
                 	StackPane avatarWithLetter = new StackPane();
                 	avatarWithLetter.getChildren().addAll(avatar, text);
                 	
@@ -111,6 +123,7 @@ class ServerHandler extends Thread {
                 	HBox.setMargin(label, new Insets(10, 0, 10, 0));
                 	messageHolder.getChildren().addAll(avatarWithLetter, label);
                 	messageArea.getChildren().add(messageHolder);
+                	scrollPane.vvalueProperty().bind(messageArea.heightProperty());
             	});
             } catch (IOException e) { 
                 e.printStackTrace(); 

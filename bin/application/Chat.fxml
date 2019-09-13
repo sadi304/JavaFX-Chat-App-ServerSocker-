@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -24,10 +25,14 @@
             <TextArea fx:id="messages" editable="false" layoutX="16.0" layoutY="155.0" prefHeight="298.0" prefWidth="199.0" style="-fx-text-fill: #111;" />
          </children>
       </Pane>
-      <VBox fx:id="messageArea" layoutX="229.0" layoutY="-1.0" prefHeight="435.0" prefWidth="677.0" spacing="10.0" style="-fx-background-color: #f2f2f2;">
-         <padding>
-            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-         </padding>
-      </VBox>
+      <ScrollPane fx:id="scrollPane" layoutX="230.0" prefHeight="431.0" prefWidth="677.0">
+         <content>
+            <VBox fx:id="messageArea" prefHeight="9.0" prefWidth="670.0" spacing="10.0" style="-fx-background-color: #f2f2f2;">
+               <padding>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </padding>
+            </VBox>
+         </content>
+      </ScrollPane>
    </children>
 </AnchorPane>
