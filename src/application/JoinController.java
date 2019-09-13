@@ -1,5 +1,6 @@
 package application;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -39,6 +40,10 @@ public class JoinController {
 			
 			Scene scene = new Scene(root);
 			stage.setScene(scene);
+			stage.setOnHidden(event -> {
+				controller.shutdown();
+				Platform.exit();
+			});
 		} catch(Exception exception) {
 			exception.printStackTrace();
 		}

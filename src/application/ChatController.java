@@ -1,7 +1,6 @@
 package application;
 
 import java.net.*;
-import java.util.ResourceBundle;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -9,11 +8,8 @@ import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -36,18 +32,29 @@ public class ChatController {
 	private TextField message;
 	
 	@FXML
-	private TextArea messages;
-	
-	@FXML
 	private VBox messageArea;
 	
 	@FXML
 	private ScrollPane scrollPane;
 	
+	@FXML
+	private Label onlineUsers;
+	
     public void initialize() {
     	connectToSocket();
 
     	scrollPane.setFitToWidth(true);
+    }
+    
+
+    public void shutdown(){
+    	try {
+			dos.writeUTF("close#_#connection");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        System.out.println("Stage is closing");
     }
     
     public void setUserName(String userName) {
@@ -65,7 +72,7 @@ public class ChatController {
             // send user name
             dos.writeUTF(userName);
             
-            Thread t = new ServerHandler(socket, dis, dos, messages, messageArea, scrollPane);
+            Thread t = new ServerHandler(socket, dis, dos, messageArea, scrollPane, onlineUsers);
             t.start();
     	} catch(UnknownHostException u) { 
             System.out.println(u); 
@@ -77,7 +84,7 @@ public class ChatController {
     
     public void onMessageEnter(ActionEvent e) throws IOException {
     	if(message.getText().trim().isEmpty()) return;
-    	dos.writeUTF(message.getText());
+    	dos.writeUTF("message#_#" + message.getText());
     	message.setText("");
     }
 }
@@ -86,16 +93,16 @@ class ServerHandler extends Thread {
 	final DataInputStream dis; 
     final DataOutputStream dos; 
     final Socket s; 
-    private TextArea messages;
     private VBox messageArea;
     private ScrollPane scrollPane;
-	public ServerHandler(Socket s, DataInputStream dis, DataOutputStream dos, TextArea messages, VBox messageArea, ScrollPane scrollPane) { 
+    private Label onlineUsers;
+	public ServerHandler(Socket s, DataInputStream dis, DataOutputStream dos, VBox messageArea, ScrollPane scrollPane, Label onlineUsers) { 
         this.s = s; 
         this.dis = dis; 
         this.dos = dos; 
-        this.messages = messages;
         this.messageArea = messageArea;
         this.scrollPane = scrollPane;
+        this.onlineUsers = onlineUsers;
     }
 	
 	@Override
@@ -104,29 +111,39 @@ class ServerHandler extends Thread {
 		while (true)  { 
             try { 
             	received = dis.readUTF();
-            	final String lambdaReceived = received;
-            	messages.appendText(received + "\n");
-            	Platform.runLater(() -> {
-                	Label label = new Label(lambdaReceived);
-                	HBox messageHolder = new HBox(5);
-                	
-                	Circle avatar = new Circle(20);
-                	
-                	String firstLetter = lambdaReceived.substring(0, 1);
-                	Text text = new Text(firstLetter);
-                	text.setBoundsType(TextBoundsType.VISUAL); 
-                	
-                	StackPane avatarWithLetter = new StackPane();
-                	avatarWithLetter.getChildren().addAll(avatar, text);
-                	
-                	avatar.setFill(Color.CADETBLUE);    
-                	HBox.setMargin(label, new Insets(10, 0, 10, 0));
-                	messageHolder.getChildren().addAll(avatarWithLetter, label);
-                	messageArea.getChildren().add(messageHolder);
-                	scrollPane.vvalueProperty().bind(messageArea.heightProperty());
-            	});
+            	String[] message = received.split("#_#");
+            	
+            	final String dataMessage = message[1];
+            	final String type = message[0];
+        		if(type.equalsIgnoreCase("message")) {
+        			Platform.runLater(() -> {
+                    	Label label = new Label(dataMessage);
+                    	HBox messageHolder = new HBox(5);
+                    	
+                    	Circle avatar = new Circle(20);
+                    	
+                    	String firstLetter = dataMessage.substring(0, 1);
+                    	Text text = new Text(firstLetter);
+                    	text.setBoundsType(TextBoundsType.VISUAL); 
+                    	
+                    	StackPane avatarWithLetter = new StackPane();
+                    	avatarWithLetter.getChildren().addAll(avatar, text);
+                    	
+                    	avatar.setFill(Color.CADETBLUE);    
+                    	HBox.setMargin(label, new Insets(10, 0, 10, 0));
+                    	messageHolder.getChildren().addAll(avatarWithLetter, label);
+                    	messageArea.getChildren().add(messageHolder);
+                    	scrollPane.vvalueProperty().bind(messageArea.heightProperty());		
+            		});
+        		} else {
+        			Platform.runLater(() -> {
+        				onlineUsers.setText(dataMessage);
+        			});
+        		}
+            	
             } catch (IOException e) { 
                 e.printStackTrace(); 
+                break;
             }
 		}
 	}

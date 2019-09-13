@@ -31,7 +31,6 @@ public class Server extends Thread {
 				String userName = "";
 				try { 
 					userName = dis.readUTF();
-//					System.out.println(userName);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
