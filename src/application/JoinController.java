@@ -1,6 +1,7 @@
 package application;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -27,28 +28,44 @@ public class JoinController {
 		}
 		
 		String userName = name.getText();
+		String serverName = server.getText();
 		
-		// handle scene change
+		ChatManager chatManager = new ChatManager();
 		try {
-			FXMLLoader loader = new FXMLLoader(getClass().getResource("Chat.fxml"));
+			boolean doesServerExist = chatManager.ifServerExist(serverName);
 			
-			ChatController controller = new ChatController();
+			if(!doesServerExist) {
+				errorMessage.setText("Server does not exist. Please enter valid server name.");
+				return;
+			}
 			
-			controller.setUserName(userName);
+			// handle scene change
+			try {
+				FXMLLoader loader = new FXMLLoader(getClass().getResource("Chat.fxml"));
+				
+				ChatController controller = new ChatController();
+				
+				controller.setUserName(userName);
+				controller.setServerName(serverName);
+				
+				loader.setController(controller);
+				
+				AnchorPane root = (AnchorPane) loader.load();
+				Stage stage = (Stage) name.getScene().getWindow();
+				
+				Scene scene = new Scene(root);
+				stage.setScene(scene);
+				stage.setOnHidden(event -> {
+					controller.shutdown();
+					Platform.exit();
+				});
+			} catch(Exception exception) {
+				exception.printStackTrace();
+			}
 			
-			loader.setController(controller);
-			
-			AnchorPane root = (AnchorPane) loader.load();
-			Stage stage = (Stage) name.getScene().getWindow();
-			
-			Scene scene = new Scene(root);
-			stage.setScene(scene);
-			stage.setOnHidden(event -> {
-				controller.shutdown();
-				Platform.exit();
-			});
-		} catch(Exception exception) {
-			exception.printStackTrace();
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
 	}
 }

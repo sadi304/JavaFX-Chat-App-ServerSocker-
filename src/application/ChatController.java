@@ -1,6 +1,7 @@
 package application;
 
 import java.net.*;
+import java.sql.SQLException;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -27,6 +28,7 @@ public class ChatController {
 	DataOutputStream dos;
 	
 	private String userName;
+	private String serverName;
 	
 	@FXML
 	private TextField message;
@@ -41,8 +43,8 @@ public class ChatController {
 	private Label onlineUsers;
 	
     public void initialize() {
+    	setEarliersMessages();
     	connectToSocket();
-
     	scrollPane.setFitToWidth(true);
     }
     
@@ -57,9 +59,25 @@ public class ChatController {
         System.out.println("Stage is closing");
     }
     
+    public void setEarliersMessages() {
+    	ChatManager chatManager = new ChatManager();
+    	
+    	try {
+			for(String message: chatManager.getEarlierMessages(this.serverName)) {
+				System.out.println(message);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+    }
+    
     public void setUserName(String userName) {
     	this.userName = userName;
     	
+    }
+    
+    public void setServerName(String serverName) {
+    	this.serverName = serverName;
     }
     
     public void connectToSocket() {
