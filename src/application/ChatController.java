@@ -64,8 +64,10 @@ public class ChatController {
     	
     	try {
 			for(String message: chatManager.getEarlierMessages(this.serverName)) {
-				System.out.println(message);
+				messageArea.getChildren().add(MessageSetter.makeMessageArea(message));
 			}
+
+        	scrollPane.vvalueProperty().bind(messageArea.heightProperty());	
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -107,6 +109,28 @@ public class ChatController {
     }
 }
 
+class MessageSetter {
+	public static HBox makeMessageArea(String message) {
+		Label label = new Label(message);
+    	HBox messageHolder = new HBox(5);
+    	
+    	Circle avatar = new Circle(20);
+    	
+    	String firstLetter = message.substring(0, 1);
+    	Text text = new Text(firstLetter);
+    	text.setBoundsType(TextBoundsType.VISUAL); 
+    	
+    	StackPane avatarWithLetter = new StackPane();
+    	avatarWithLetter.getChildren().addAll(avatar, text);
+    	
+    	avatar.setFill(Color.CADETBLUE);    
+    	HBox.setMargin(label, new Insets(10, 0, 10, 0));
+    	messageHolder.getChildren().addAll(avatarWithLetter, label);
+    	
+    	return messageHolder;
+	}
+}
+
 class ServerHandler extends Thread {
 	final DataInputStream dis; 
     final DataOutputStream dos; 
@@ -135,22 +159,23 @@ class ServerHandler extends Thread {
             	final String type = message[0];
         		if(type.equalsIgnoreCase("message")) {
         			Platform.runLater(() -> {
-                    	Label label = new Label(dataMessage);
-                    	HBox messageHolder = new HBox(5);
-                    	
-                    	Circle avatar = new Circle(20);
-                    	
-                    	String firstLetter = dataMessage.substring(0, 1);
-                    	Text text = new Text(firstLetter);
-                    	text.setBoundsType(TextBoundsType.VISUAL); 
-                    	
-                    	StackPane avatarWithLetter = new StackPane();
-                    	avatarWithLetter.getChildren().addAll(avatar, text);
-                    	
-                    	avatar.setFill(Color.CADETBLUE);    
-                    	HBox.setMargin(label, new Insets(10, 0, 10, 0));
-                    	messageHolder.getChildren().addAll(avatarWithLetter, label);
-                    	messageArea.getChildren().add(messageHolder);
+//                    	Label label = new Label(dataMessage);
+//                    	HBox messageHolder = new HBox(5);
+//                    	
+//                    	Circle avatar = new Circle(20);
+//                    	
+//                    	String firstLetter = dataMessage.substring(0, 1);
+//                    	Text text = new Text(firstLetter);
+//                    	text.setBoundsType(TextBoundsType.VISUAL); 
+//                    	
+//                    	StackPane avatarWithLetter = new StackPane();
+//                    	avatarWithLetter.getChildren().addAll(avatar, text);
+//                    	
+//                    	avatar.setFill(Color.CADETBLUE);    
+//                    	HBox.setMargin(label, new Insets(10, 0, 10, 0));
+//                    	messageHolder.getChildren().addAll(avatarWithLetter, label);
+        				
+                    	messageArea.getChildren().add(MessageSetter.makeMessageArea(dataMessage));
                     	scrollPane.vvalueProperty().bind(messageArea.heightProperty());		
             		});
         		} else {
