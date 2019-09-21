@@ -1,5 +1,7 @@
 package application;
 
+import java.sql.Connection;
+
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -18,6 +20,7 @@ public class JoinController {
 	@FXML
 	private Text errorMessage;
 	public void handleJoin(ActionEvent e) {
+		Connection connection = DBConnect.getConnection();
 		if(name.getText().trim().isEmpty() || server.getText().trim().isEmpty()) {
 			errorMessage.setText("Fields are required. Please enter.");
 			return;
