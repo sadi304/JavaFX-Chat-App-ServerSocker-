@@ -47,4 +47,20 @@ public class ChatManager {
 			preparedStatement.close();
 		}
 	}
+	
+	public void addMessage(String message, String serverName) throws SQLException {
+		PreparedStatement preparedStatement = null;
+		String query = "INSERT INTO ServerMessage (message, serverName) values (?, ?)";
+		
+		try {
+			preparedStatement = connection.prepareStatement(query);
+			preparedStatement.setString(1, message);
+			preparedStatement.setString(2, serverName);
+			preparedStatement.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			preparedStatement.close();
+		}
+	}
 }

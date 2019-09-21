@@ -20,7 +20,7 @@ public class ServerMain {
         		chatManager.createServer(serverName);
         	}
         	
-            Server server = new Server(port);
+            Server server = new Server(port, serverName);
             server.start();
             System.out.println("Server statarted at " + port);
         } catch (SQLException e) {

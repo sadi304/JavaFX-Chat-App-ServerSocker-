@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.util.List;
 
 public class ServerWorker extends Thread {
@@ -31,6 +32,8 @@ public class ServerWorker extends Thread {
         		worker.sendOnlineUsers(workerList.size());
         	}
 			
+			ChatManager chatManager = new ChatManager();
+			
 			while (true)  { 
 	            try { 
 	            	receivedMessage = dis.readUTF(); 
@@ -39,6 +42,7 @@ public class ServerWorker extends Thread {
 	            	String message = splitMessage[1];
 	            	String type = splitMessage[0];
 	            	if(type.equalsIgnoreCase("message")) {
+	            		chatManager.addMessage((this.userName + ": " + message), this.server.getServerName());
 		            	for(ServerWorker worker : workerList) {
 		            		worker.send(this.userName, message);
 		            	}
@@ -51,7 +55,7 @@ public class ServerWorker extends Thread {
 	            		
 	            		break;
 	            	}
-	            } catch (IOException e) { 
+	            } catch (IOException | SQLException e) { 
 	                e.printStackTrace(); 
 	                break;
 	            }

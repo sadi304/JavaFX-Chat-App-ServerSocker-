@@ -8,11 +8,17 @@ import java.util.List;
 
 public class Server extends Thread {
     private final int port;
+    private final String name;
     
     private ArrayList<ServerWorker> workerList = new ArrayList<>(); 
 	
-    public Server(int port) {
+    public Server(int port, String name) {
     	this.port = port;
+    	this.name = name;
+    }
+    
+    public String getServerName() {
+    	return this.name;
     }
     
     public List<ServerWorker> getWorkerList() {
