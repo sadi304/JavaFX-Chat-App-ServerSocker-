@@ -25,6 +25,10 @@ public class Server extends Thread {
     	return workerList;
     }
     
+    public void removeWorker(ServerWorker worker) {
+    	this.workerList.remove(worker);
+    }
+    
     @Override
     public void run() {
         try { 

@@ -8,6 +8,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
@@ -41,6 +42,9 @@ public class ChatController {
 	
 	@FXML
 	private Label onlineUsers;
+	
+	@FXML
+	private ListView<String> onlineUsersList;
 	
     public void initialize() {
     	setEarliersMessages();
@@ -92,7 +96,7 @@ public class ChatController {
             // send user name
             dos.writeUTF(userName);
             
-            Thread t = new ServerHandler(socket, dis, dos, messageArea, scrollPane, onlineUsers);
+            Thread t = new ServerHandler(socket, dis, dos, messageArea, scrollPane, onlineUsers, onlineUsersList);
             t.start();
     	} catch(UnknownHostException u) { 
             System.out.println(u); 
@@ -104,7 +108,13 @@ public class ChatController {
     
     public void onMessageEnter(ActionEvent e) throws IOException {
     	if(message.getText().trim().isEmpty()) return;
-    	dos.writeUTF("message#_#" + message.getText());
+    	String messageText = message.getText();
+    	String selectedUser = onlineUsersList.getSelectionModel().getSelectedItem();
+    	if(selectedUser != "All Users" && !onlineUsersList.getSelectionModel().isEmpty()) {
+        	dos.writeUTF("individual#_#" + selectedUser + ":" + messageText);
+    	} else {
+        	dos.writeUTF("message#_#" + messageText);
+    	}
     	message.setText("");
     }
 }
@@ -138,14 +148,24 @@ class ServerHandler extends Thread {
     private VBox messageArea;
     private ScrollPane scrollPane;
     private Label onlineUsers;
-	public ServerHandler(Socket s, DataInputStream dis, DataOutputStream dos, VBox messageArea, ScrollPane scrollPane, Label onlineUsers) { 
+    private ListView<String> onlineUsersList;
+	public ServerHandler(Socket s, DataInputStream dis, DataOutputStream dos, VBox messageArea, ScrollPane scrollPane, Label onlineUsers, ListView<String> onlineUsersList) { 
         this.s = s; 
         this.dis = dis; 
         this.dos = dos; 
         this.messageArea = messageArea;
         this.scrollPane = scrollPane;
         this.onlineUsers = onlineUsers;
+        this.onlineUsersList = onlineUsersList;
     }
+	
+	public void setOnlineUsers(String[] onlineUsers) {
+		onlineUsersList.getItems().clear(); // clear first
+		onlineUsersList.getItems().add("All Users"); // set all users
+		for(String onlineUser : onlineUsers) {
+			onlineUsersList.getItems().add(onlineUser);
+		}
+	}
 	
 	@Override
     public void run() {
@@ -178,7 +198,15 @@ class ServerHandler extends Thread {
                     	messageArea.getChildren().add(MessageSetter.makeMessageArea(dataMessage));
                     	scrollPane.vvalueProperty().bind(messageArea.heightProperty());		
             		});
-        		} else {
+        		} else if(type.equalsIgnoreCase("online_users")) {
+        			Platform.runLater(() -> {
+        				String onlineUsersString = dataMessage.substring(0, dataMessage.length() - 1); // cut extra comma
+        				String[] onlineUsers = onlineUsersString.split(",");
+        				setOnlineUsers(onlineUsers);
+        			});
+        		}
+        		
+        		else {
         			Platform.runLater(() -> {
         				onlineUsers.setText(dataMessage);
         			});
